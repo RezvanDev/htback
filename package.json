@@ -1,0 +1,23 @@
+{
+  "name": "telegram-mini-app",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "generate-tasks": "node scripts/taskGenerator.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.16.2",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "node-cron": "^3.0.3",
+    "node-telegram-bot-api": "^0.66.0",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12",
+    "prisma": "^4.12.0"
+  }
+}

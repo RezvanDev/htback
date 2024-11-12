@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int               @id @default(autoincrement())
+  telegramId           String            @unique
+  username             String?
+  firstName            String?
+  lastName             String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  completedTasks       TaskCompletion[]
+  userTasks           UserTask[]        // Новая связь
+  userTaskCompletions UserTaskCompletion[] // Новая связь
+  totalXP              Int               @default(0)
+  userAchievements  UserAchievement[] // Новое поле
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  category    String
+  title       String
+  description String
+  xp          Int
+  type        String   // daily, weekly, monthly
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completions TaskCompletion[]
+}
+
+model TaskCompletion {
+  id          Int      @id @default(autoincrement())
+  taskId      String
+  userId      Int
+  completedAt DateTime @default(now())
+  task        Task     @relation(fields: [taskId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([taskId, userId])
+}
+
+model UserTask {
+  id          String   @id @default(uuid())
+  userId      Int
+  title       String
+  description String?
+  category    String   // finance, relationships, mindfulness, entertainment, meaning
+  priority    String   // low, medium, high
+  repeat      String   // none, daily, weekly, monthly
+  deadline    DateTime?
+  xp          Int      @default(10)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  completions UserTaskCompletion[]
+}
+
+
+model UserTaskCompletion {
+  id          Int      @id @default(autoincrement())
+  taskId      String
+  userId      Int
+  completedAt DateTime @default(now())
+  task        UserTask @relation(fields: [taskId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([taskId, userId, completedAt]) // Одна задача может быть выполнена один раз в день
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        String   // TASK_COUNT, STREAK, CATEGORY_MASTER и т.д.
+  rarity      String   // common, rare, epic, legendary
+  requirement Int      // Требуемое значение для получения
+  xpReward    Int      // Награда XP
+  icon        String   // Название иконки
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userAchievements UserAchievement[]
+}
+
+// Модель полученных достижений пользователя
+model UserAchievement {
+  id            Int        @id @default(autoincrement())
+  userId        Int
+  achievementId String
+  unlockedAt    DateTime   @default(now())
+  progress      Int        @default(0)    // Текущий прогресс
+  user          User       @relation(fields: [userId], references: [id])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
